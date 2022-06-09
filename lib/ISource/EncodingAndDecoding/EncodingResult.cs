@@ -1,5 +1,8 @@
 ﻿namespace CCT.ISource.EncodingAndDecoding
 {
+    /// <summary>
+    /// 信源编码结果
+    /// </summary>
     public class EncodingResult
     {
         public string[] Codons { get; set; }            // 码字 

@@ -26,36 +26,25 @@ namespace CCT.Common
         /// <returns>排序结果</returns>
         public static SortResult Sort(double[] array, SortOrder order = SortOrder.Descending)
         {
-            SortResult res = new(array, new int[array.Length]);
+            SortResult res = new(new double[array.Length], new int[array.Length]);
 
-            // 拷贝原数组
-            var arrayCopy = new double[array.Length];
-            Array.Copy(array, arrayCopy, arrayCopy.Length);
-
-            // 对数组进行排序
-            if (order == SortOrder.Ascending) 
-            { 
-                Array.Sort(array); 
-            }
-            else 
+            Array.Copy(array, res.Data, array.Length);
+            for(int i = 0; i < res.Index.Length; i++)
             {
-                Array.Sort(array);
-                Array.Reverse(array); 
+                res.Index[i] = i;
             }
 
-            // 遍历拷贝数组，获取索引
-            for(int i = 0; i < array.Length; i++)
+            if(order == SortOrder.Ascending)
             {
-                for(int j = 0; j < arrayCopy.Length; j++)
-                {
-                    if(array[i] == arrayCopy[j])
-                    {
-                        res.Index[i] = j;
-                        arrayCopy[j] = -65535;
-                        break;
-                    }
-                }
+                Array.Sort<double, int>(res.Data, res.Index);
             }
+            else if(order == SortOrder.Descending)
+            {
+                Array.Sort<double, int>(res.Data, res.Index);
+                Array.Reverse(res.Data);
+                Array.Reverse(res.Index);
+            }
+
             return res;
         }
     }

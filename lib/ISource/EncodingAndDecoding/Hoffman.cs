@@ -4,6 +4,12 @@ namespace CCT.ISource.EncodingAndDecoding
 {
     public class Hoffman
     {
+        /// <summary>
+        /// 对离散信源进行二进制霍夫曼编码
+        /// </summary>
+        /// <param name="probabilities">信源概率分布数组</param>
+        /// <returns></returns>
+        /// <exception cref="ArgumentException"></exception>
         public static EncodingResult Encoding(double[] probabilities)
         {
             // 检查输入参数
@@ -26,7 +32,7 @@ namespace CCT.ISource.EncodingAndDecoding
 
                 // 合并概率最小的两项
                 var combineProbabilities = new double[probabilities.Length - 1];
-                Array.Copy(probabilities, combineProbabilities, combineProbabilities.Length - 2);
+                Array.Copy(probabilities, combineProbabilities, combineProbabilities.Length - 1);
                 combineProbabilities[^1] = probabilities[^2] + probabilities[^1];
 
                 // 降序排列合并后的数组
