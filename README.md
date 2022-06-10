@@ -1,6 +1,6 @@
 # CCT
 
-![version: v1.0.1 (shields.io)](https://img.shields.io/badge/version-v1.0.1-green) ![version: v1.0.0 (shields.io)](https://img.shields.io/badge/.net-v6.0-orange) ![version: v1.0.0 (shields.io)](https://img.shields.io/badge/License-MIT-blue)
+![version: v1.0.3 (shields.io)](https://img.shields.io/badge/version-v1.0.3-green) ![version: v1.0.0 (shields.io)](https://img.shields.io/badge/.net-v6.0-orange) ![version: v1.0.0 (shields.io)](https://img.shields.io/badge/License-MIT-blue)
 
 ## Background
 
@@ -20,9 +20,16 @@
 
 各个模块的计算方法均位于对应的命名空间下
 
-|  模 块   |       命名空间       |
-| :------: | :------------------: |
-| 信源编码 | CCT.ISource.Encoding |
+|     模 块     |  命名空间   |
+| :-----------: | :---------: |
+| 信源编码/译码 | CCT.ISource |
+
+该仓库也包含了大量示例程序
+
+|             简 介              |                            链 接                             |
+| :----------------------------: | :----------------------------------------------------------: |
+| 信源编码（霍夫曼、费诺、香农） | [Go](https://github.com/Redns/CCT/tree/master/test/SourceEncoding) |
+|        信源编码 & 译码         | [Go](https://github.com/Redns/CCT/tree/master/test/SourceEncodingAndDecoding) |
 
 ## Q & A
 
