@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace CCT.Common
+﻿namespace CCT.Common
 {
     public class SortPlus
     {
@@ -36,11 +30,11 @@ namespace CCT.Common
 
             if(order == SortOrder.Ascending)
             {
-                Array.Sort<double, int>(res.Data, res.Index);
+                Array.Sort(res.Data, res.Index);
             }
             else if(order == SortOrder.Descending)
             {
-                Array.Sort<double, int>(res.Data, res.Index);
+                Array.Sort(res.Data, res.Index);
                 Array.Reverse(res.Data);
                 Array.Reverse(res.Index);
             }

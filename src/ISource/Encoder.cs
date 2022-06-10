@@ -2,15 +2,40 @@
 
 namespace CCT.ISource
 {
-    public class Encoding
+    public class Encoder
     {
+        /// <summary>
+        /// 信源编码结果
+        /// </summary>
+        public struct EncodeResult
+        {
+            public Dictionary<string, string> Codons { get; set; }  // 码字
+            public double AverageLength { get; set; }               // 平均码长
+            public double Efficient { get; set; }                   // 编码效率
+
+            public EncodeResult()
+            {
+                Codons = new Dictionary<string, string>();
+                AverageLength = 0;
+                Efficient = 0;
+            }
+
+            public EncodeResult(Dictionary<string, string> codons, double averageLength, double efficient)
+            {
+                Codons = codons;
+                AverageLength = averageLength;
+                Efficient = efficient;
+            }
+        }
+
+
         /// <summary>
         /// 霍夫曼编码(二进制)
         /// </summary>
         /// <param name="probabilities">信源概率分布数组</param>
         /// <returns></returns>
         /// <exception cref="ArgumentException"></exception>
-        public static EncodingResult Hoffman(double[] probabilities)
+        public static (string[] Codons, double AverageLength, double Efficient) Hoffman(double[] probabilities)
         {
             // 检查输入参数
             foreach (var probability in probabilities)
@@ -26,16 +51,18 @@ namespace CCT.ISource
             {
                 if (probabilities[0] >= probabilities[1])
                 {
-                    return new EncodingResult(new string[] { "1", "0" }, 1, Common.Math.Entropy(probabilities));
+                    return (new string[] { "1", "0" }, 1, Common.Math.Entropy(probabilities));
                 }
                 else
                 {
-                    return new EncodingResult(new string[] { "0", "1" }, 1, Common.Math.Entropy(probabilities));
+                    return (new string[] { "0", "1" }, 1, Common.Math.Entropy(probabilities));
                 }
             }
             else
             {
-                EncodingResult res = new(new string[probabilities.Length], 0, 0);
+                var codons = new string[probabilities.Length];
+                var averageLength = 0.0;
+                var efficient = 0.0;
 
                 // 将概率数组降序排列
                 var probabilitiesSortResult = SortPlus.Sort(probabilities);
@@ -55,24 +82,51 @@ namespace CCT.ISource
                 }
 
                 // 合并编码
-                Array.Copy(combineProbabilitiesCondons, res.Codons, res.Codons.Length - 2);
-                res.Codons[^2] = combineProbabilitiesCondons.Last() + "1";
-                res.Codons[^1] = combineProbabilitiesCondons.Last() + "0";
+                Array.Copy(combineProbabilitiesCondons, codons, codons.Length - 2);
+                codons[^2] = combineProbabilitiesCondons.Last() + "1";
+                codons[^1] = combineProbabilitiesCondons.Last() + "0";
 
                 // 计算平均码长和编码效率
-                res.AverageLength = Common.Math.SourceEncodingAverageLength(probabilitiesSortResult.Data, res.Codons);
-                res.Efficient = Common.Math.SourceEncodingEfficient(Common.Math.Entropy(probabilitiesSortResult.Data), res.AverageLength);
+                averageLength = Common.Math.SourceEncodingAverageLength(probabilitiesSortResult.Data, codons);
+                efficient = Common.Math.SourceEncodingEfficient(Common.Math.Entropy(probabilitiesSortResult.Data), averageLength);
 
                 // 还原概率数组的原始顺序
-                var resCodons = new string[res.Codons.Length];
-                for (int i = 0; i < res.Codons.Length; i++)
+                var resCodons = new string[codons.Length];
+                for (int i = 0; i < codons.Length; i++)
                 {
-                    resCodons[probabilitiesSortResult.Index[i]] = res.Codons[i];
+                    resCodons[probabilitiesSortResult.Index[i]] = codons[i];
                 }
-                res.Codons = resCodons;
+                codons = resCodons;
 
-                return res;
+                return (codons, averageLength, efficient);
             }
+        }
+
+
+        /// <summary>
+        /// 霍夫曼编码(二进制)
+        /// </summary>
+        /// <param name="countResult">信源统计结果</param>
+        /// <returns></returns>
+        public static EncodeResult Hoffman(Counter.CountResult countResult)
+        {
+            var res = new EncodeResult();
+            var characters = countResult.Symbols.Keys.ToArray();
+            var characterProbabilities = new double[characters.Length];
+            for(int i = 0; i < characters.Length; i++)
+            {
+                characterProbabilities[i] = countResult.Symbols[characters[i]];
+            }
+
+            string[] codons;
+            (codons, res.AverageLength, res.Efficient) = Hoffman(characterProbabilities);
+
+            for(int i = 0; i < characters.Length; i++)
+            {
+                res.Codons.Add($"{characters[i]}", codons[i]);
+            }
+
+            return res;
         }
 
 
@@ -81,8 +135,12 @@ namespace CCT.ISource
         /// </summary>
         /// <param name="probabilities">信源概率分布数组</param>
         /// <returns></returns>
-        public static EncodingResult Shannon(double[] probabilities)
+        public static (string[] Codons, double AverageLength, double Efficient) Shannon(double[] probabilities)
         {
+            var resEfficient = 0.0;
+            var resAverageLength = 0.0;
+            var resCodons = new string[probabilities.Length];
+
             // 检查输入参数
             foreach (var probability in probabilities)
             {
@@ -96,7 +154,6 @@ namespace CCT.ISource
             var probabilitiesSum = 0.0;
             var probabilitiesSortedResult = SortPlus.Sort(probabilities);
             var codons = new string[probabilitiesSortedResult.Data.Length];
-            var res = new EncodingResult(new string[probabilities.Length], 0, 0);
             for (int i = 0; i < probabilitiesSortedResult.Data.Length; i++)
             {
                 codons[i] = DoubleToBinstr(probabilitiesSum, (int)System.Math.Ceiling((-1) * System.Math.Log2(probabilitiesSortedResult.Data[i])));
@@ -106,12 +163,39 @@ namespace CCT.ISource
             // 还原原始编码顺序
             for(int j = 0; j < probabilitiesSortedResult.Index.Length; j++)
             {
-                res.Codons[probabilitiesSortedResult.Index[j]] = codons[j];
+                resCodons[probabilitiesSortedResult.Index[j]] = codons[j];
             }
 
             // 计算平均码长和编码效率
-            res.AverageLength = Common.Math.SourceEncodingAverageLength(probabilities, res.Codons);
-            res.Efficient = Common.Math.SourceEncodingEfficient(Common.Math.Entropy(probabilities), res.AverageLength);
+            resAverageLength = Common.Math.SourceEncodingAverageLength(probabilities, resCodons);
+            resEfficient = Common.Math.SourceEncodingEfficient(Common.Math.Entropy(probabilities), resAverageLength);
+            return (resCodons, resAverageLength, resEfficient);
+        }
+
+
+        /// <summary>
+        /// 香农编码(二进制)
+        /// </summary>
+        /// <param name="countResult">信源统计结果</param>
+        /// <returns></returns>
+        public static EncodeResult Shannon(Counter.CountResult countResult)
+        {
+            var res = new EncodeResult();
+            var characters = countResult.Symbols.Keys.ToArray();
+            var characterProbabilities = new double[characters.Length];
+            for (int i = 0; i < characters.Length; i++)
+            {
+                characterProbabilities[i] = countResult.Symbols[characters[i]];
+            }
+
+            string[] codons;
+            (codons, res.AverageLength, res.Efficient) = Shannon(characterProbabilities);
+
+            for (int i = 0; i < characters.Length; i++)
+            {
+                res.Codons.Add($"{characters[i]}", codons[i]);
+            }
+
             return res;
         }
 
@@ -121,7 +205,7 @@ namespace CCT.ISource
         /// </summary>
         /// <param name="probabilities">信源概率分布数组</param>
         /// <returns></returns>
-        public static EncodingResult Feno(double[] probabilities)
+        public static (string[] Codons, double AverageLength, double Efficient) Feno(double[] probabilities)
         {
             // 检查输入参数
             foreach (var probability in probabilities)
@@ -136,15 +220,18 @@ namespace CCT.ISource
             if(probabilities.Length == 1) { throw new ArgumentException("概率数组长度不能小于2!"); }
             else if (probabilities.Length == 2)
             {
-                if (probabilities[0] >= probabilities[1]) { return new EncodingResult(new string[] { "1", "0" }, 1, Common.Math.Entropy(probabilities)); }
-                else { return new EncodingResult(new string[] { "0", "1" }, 1, Common.Math.Entropy(probabilities)); }
+                if (probabilities[0] >= probabilities[1]) { return (new string[] { "1", "0" }, 1, Common.Math.Entropy(probabilities)); }
+                else { return (new string[] { "0", "1" }, 1, Common.Math.Entropy(probabilities)); }
             }
             else
             {
                 // 将输入概率数组降序排列
                 var probabilitiesSortedResult = SortPlus.Sort(probabilities);
                 var sortedCodons = new string[probabilitiesSortedResult.Data.Length];
-                var res = new EncodingResult(new string[probabilities.Length], 0, 0);
+
+                var resEfficient = 0.0;
+                var resAverageLength = 0.0;
+                var resCodons = new string[probabilities.Length];
 
                 // 将输入概率数组均分为两份
                 var probabilitiesEqualDivideResult = EqualDivide(probabilities);
@@ -166,7 +253,7 @@ namespace CCT.ISource
                 if(probabilitiesEqualDivideResult.Upper.Length >= 2)
                 {
                     var probabilitiesUpperEncodingResult = Feno(probabilitiesEqualDivideResult.Upper);
-                    for(int i = 0; i < probabilitiesUpperEncodingResult.Codons.Length; i++)
+                    for (int i = 0; i < probabilitiesUpperEncodingResult.Codons.Length; i++)
                     {
                         sortedCodons[i] += probabilitiesUpperEncodingResult.Codons[i];
                     }
@@ -185,14 +272,41 @@ namespace CCT.ISource
                 // 还原输入概率数组的顺序
                 for (int i = 0; i < sortedCodons.Length; i++)
                 {
-                    res.Codons[probabilitiesSortedResult.Index[i]] = sortedCodons[i];
+                    resCodons[probabilitiesSortedResult.Index[i]] = sortedCodons[i];
                 }
 
                 // 计算平均码长和编码效率
-                res.AverageLength = Common.Math.SourceEncodingAverageLength(probabilities, res.Codons);
-                res.Efficient = Common.Math.SourceEncodingEfficient(Common.Math.Entropy(probabilities), res.AverageLength);
-                return res;
+                resAverageLength = Common.Math.SourceEncodingAverageLength(probabilities, resCodons);
+                resEfficient = Common.Math.SourceEncodingEfficient(Common.Math.Entropy(probabilities), resAverageLength);
+                return (resCodons, resAverageLength, resEfficient);
             }
+        }
+
+
+        /// <summary>
+        /// 费诺编码(二进制)
+        /// </summary>
+        /// <param name="countResult">信源统计结果</param>
+        /// <returns></returns>
+        public static EncodeResult Feno(Counter.CountResult countResult)
+        {
+            var res = new EncodeResult();
+            var characters = countResult.Symbols.Keys.ToArray();
+            var characterProbabilities = new double[characters.Length];
+            for (int i = 0; i < characters.Length; i++)
+            {
+                characterProbabilities[i] = countResult.Symbols[characters[i]];
+            }
+
+            string[] codons;
+            (codons, res.AverageLength, res.Efficient) = Feno(characterProbabilities);
+
+            for (int i = 0; i < characters.Length; i++)
+            {
+                res.Codons.Add($"{characters[i]}", codons[i]);
+            }
+
+            return res;
         }
 
 
@@ -251,50 +365,25 @@ namespace CCT.ISource
                 return new DivideResult(minDifferenceIndex, minDifference, d[0..(minDifferenceIndex + 1)], d[(minDifferenceIndex + 1)..d.Length]);
             }
         }
-    }
 
 
-    /// <summary>
-    /// 信源编码结果
-    /// </summary>
-    public class EncodingResult
-    {
-        public string[] Codons { get; set; }            // 码字 
-        public double AverageLength { get; set; }       // 平均码长
-        public double Efficient { get; set; }           // 编码效率
-
-        public EncodingResult()
+        /// <summary>
+        /// 数组均分结果
+        /// </summary>
+        struct DivideResult
         {
-            Codons = Array.Empty<string>();
-            AverageLength = 0;
-            Efficient = 0;
-        }
+            public int Index { get; set; }          // 均分位置索引（含该索引）
+            public double Diff { get; set; }        // 上下两部分的差值
+            public double[] Upper { get; set; }     // 上半部分
+            public double[] Lower { get; set; }     // 下半部分
 
-        public EncodingResult(string[] codons, double averageLength, double efficient)
-        {
-            Codons = codons;
-            AverageLength = averageLength;
-            Efficient = efficient;
-        }
-    }
-
-
-    /// <summary>
-    /// 数组均分结果
-    /// </summary>
-    public class DivideResult
-    {
-        public int Index { get; set; }          // 均分位置索引（含该索引）
-        public double Diff { get; set; }        // 上下两部分的差值
-        public double[] Upper { get; set; }     // 上半部分
-        public double[] Lower { get; set; }     // 下半部分
-
-        public DivideResult(int index, double diff, double[] upper, double[] lower)
-        {
-            Index = index;
-            Diff = diff;
-            Upper = upper;
-            Lower = lower;
+            public DivideResult(int index, double diff, double[] upper, double[] lower)
+            {
+                Index = index;
+                Diff = diff;
+                Upper = upper;
+                Lower = lower;
+            }
         }
     }
 }

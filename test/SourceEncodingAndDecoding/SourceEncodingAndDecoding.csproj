@@ -8,9 +8,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Reference Include="CCT">
-      <HintPath>..\lib\bin\Release\net6.0\CCT.dll</HintPath>
-    </Reference>
+    <ProjectReference Include="..\..\src\CCT.csproj" />
   </ItemGroup>
 
 </Project>

@@ -5,7 +5,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
-    <Version>1.0.1</Version>
+    <Version>1.0.3</Version>
     <Authors>Krins</Authors>
     <Description>通信计算工具箱 ((Communication Computing Toolbox))</Description>
     <Copyright></Copyright>
@@ -16,7 +16,8 @@
     <RepositoryType>git</RepositoryType>
     <PackageTags>communication-toolbox</PackageTags>
     <PackageRequireLicenseAcceptance>True</PackageRequireLicenseAcceptance>
-    <PackageReleaseNotes>✨ 新增费诺编码和香农编码</PackageReleaseNotes>
+    <PackageReleaseNotes>✨ 新增信源译码
+🪄 优化信源编码</PackageReleaseNotes>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
   </PropertyGroup>
 
