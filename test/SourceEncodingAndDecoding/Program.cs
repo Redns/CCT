@@ -14,7 +14,7 @@
             var hoffmanResult = CCT.ISource.Encoder.Hoffman(countResult);
 
             // 3.转换
-            var encodeMsg = CCT.ISource.Transformer.Transform(msg, hoffmanResult.Codons);
+            var encodeMsg = CCT.ISource.Encoder.Encode(msg, hoffmanResult.Codons);
 
             // 4.译码
             var decodeMsg = CCT.ISource.Decoder.Decode(encodeMsg, hoffmanResult.Codons);

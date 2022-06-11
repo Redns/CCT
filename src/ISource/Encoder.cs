@@ -6,7 +6,7 @@ namespace CCT.ISource
     {
         /// <summary>
         /// 信源编码结果
-        /// </summary>
+        /// </summary>s
         public struct EncodeResult
         {
             public Dictionary<string, string> Codons { get; set; }  // 码字
@@ -26,6 +26,22 @@ namespace CCT.ISource
                 AverageLength = averageLength;
                 Efficient = efficient;
             }
+        }
+
+
+        /// <summary>
+        /// 使用特定码集对信源进行转换
+        /// </summary>
+        /// <param name="msg">信源字符序列</param>
+        /// <param name="codeSet">码集</param>
+        /// <returns></returns>
+        public static string Encode(string msg, Dictionary<string, string> codeSet)
+        {
+            foreach (var character in codeSet.Keys)
+            {
+                msg = msg.Replace(character, codeSet[character]);
+            }
+            return msg;
         }
 
 
