@@ -1,57 +1,82 @@
 ﻿namespace CCT.ISource
 {
     /// <summary>
-    /// 数据流统计类，对数据流中字符的概率分布进行统计                                                                       
+    /// 数据流统计类                                                                 
     /// </summary>
     public class Counter
     {
         /// <summary>
-        /// 字符概率分布统计结果
+        /// 统计字节数组中的符号概率分布
         /// </summary>
-        public struct CountResult
-        {
-            public string Msg { get; set; }                         // 数据流
-            public long Length { get; set; }                        // 输入字符串长度
-            public Dictionary<char, double> Symbols { get; set; }   // 字符串中字符的概率分布(格式为：字符-概率)
-
-            public CountResult(string msg, long length, Dictionary<char, double> characters)
-            {
-                Msg = msg;
-                Length = length;
-                Symbols = characters;
-            }
-        }
-
-
-        /// <summary>
-        /// 统计数据流中的字符概率分布
-        /// </summary>
-        /// <param name="msg">数据流</param>
+        /// <param name="data">输入字节数组</param>
         /// <returns></returns>
-        public static CountResult Count(string msg)
+        public static Dictionary<byte, double> Count(byte[] data)
         {
-            var res = new CountResult(msg, msg.Length, new Dictionary<char, double>());
-            
+            Dictionary<byte, double> symbols = new();
+
             // 统计数据流中的字符
-            for(int i = 0; i < msg.Length; i++)
+            for(int i = 0; i < data.Length; i++)
             {
-                if (res.Symbols.ContainsKey(msg[i]))
+                if (symbols.ContainsKey(data[i]))
                 {
-                    res.Symbols[msg[i]] += 1; 
+                    symbols[data[i]] += 1; 
                 }
                 else
                 {
-                    res.Symbols.Add(msg[i], 1);
+                    symbols.Add(data[i], 1);
                 }
             }
 
             // 归一化概率
-            foreach(var character in res.Symbols.Keys)
+            foreach(var symbolKey in symbols.Keys)
             {
-                res.Symbols[character] /= res.Length; 
+                symbols[symbolKey] /= data.Length; 
             }
 
-            return res;
+            return symbols;
+        }
+
+
+        /// <summary>
+        /// 统计字符串中的符号概率分布
+        /// </summary>
+        /// <param name="data">输入字符串</param>
+        /// <returns></returns>
+        public static Dictionary<byte, double> Count(string data)
+        {
+            return Count(System.Text.Encoding.UTF8.GetBytes(data));
+        }
+
+
+        /// <summary>
+        /// 统计数据流中的符号概率分布
+        /// </summary>
+        /// <param name="bitStream">输入数据流</param>
+        /// <param name="bufferSize">缓冲区大小（字节）</param>
+        /// <returns></returns>
+        public static Dictionary<byte, double> Count(Stream bitStream, int bufferSize = 2048)
+        {
+            var buffer = new byte[bufferSize];
+            var symbols = new Dictionary<byte, double>();
+
+            int readinLen, totalLen = 0;
+            while ((readinLen = bitStream.Read(buffer, 0, buffer.Length)) > 0)
+            {
+                totalLen += readinLen;
+                for (int i = 0; i < readinLen; i++)
+                {
+                    if (symbols.ContainsKey(buffer[i])) { symbols[buffer[i]] += 1; }
+                    else { symbols.Add(buffer[i], 1); }
+                }
+            }
+
+            // 归一化概率
+            foreach (var symbolKey in symbols.Keys)
+            {
+                symbols[symbolKey] /= totalLen;
+            }
+
+            return symbols;
         }
     }
 }

@@ -5,12 +5,12 @@
         static void Main(string[] args)
         {
             // 原始数据
-            var msg = "This is a test txt.";
+            var msg = System.Text.Encoding.UTF8.GetBytes("This is a test txt.");
 
             // 1.数据统计
             var countResult = CCT.ISource.Counter.Count(msg);
 
-            // 2.信源编码（霍夫曼、费诺、香农）
+            // 2.信源编码
             var hoffmanResult = CCT.ISource.Encoder.Hoffman(countResult);
 
             // 3.转换

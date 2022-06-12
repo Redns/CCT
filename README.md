@@ -16,13 +16,15 @@
 
 [CCT](https://github.com/Redns/CCT) 将整个通信流程分为若干个模块，具体结构如下
 
-![image-20220610184744083](http://imagebed.krins.cloud/api/image/6J4R2XT4.png)
+![image-20220612153638177](http://imagebed.krins.cloud/api/image/LHL4L8FR.png)
 
 各个模块的计算方法均位于对应的命名空间下
 
-|     模 块     |  命名空间   |
-| :-----------: | :---------: |
-| 信源编码/译码 | CCT.ISource |
+|           模 块            |   命名空间   |
+| :------------------------: | :----------: |
+|     信源（编码/译码）      | CCT.ISource  |
+| 信道（编码/译码/数学模型） | CCT.IChannel |
+|         调制/解调          |  CCT.Modem   |
 
 该仓库也包含了大量示例程序
 

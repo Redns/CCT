@@ -5,9 +5,14 @@ VisualStudioVersion = 17.2.32526.322
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CCT", "CCT.csproj", "{68D926D8-3B20-48E5-B961-F9FD61EE7C5B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SourceEncoding", "..\test\SourceEncoding\SourceEncoding.csproj", "{CF7A3428-C829-4A31-B34E-1C61E0A0184E}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SourceEncoding", "..\test\SourceEncoding\SourceEncoding.csproj", "{CF7A3428-C829-4A31-B34E-1C61E0A0184E}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SourceEncodingAndDecoding", "..\test\SourceEncodingAndDecoding\SourceEncodingAndDecoding.csproj", "{A141625E-125B-4166-BD06-A8CBE0C3B672}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SourceEncodingAndDecoding", "..\test\SourceEncodingAndDecoding\SourceEncodingAndDecoding.csproj", "{A141625E-125B-4166-BD06-A8CBE0C3B672}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{2C933A0E-C18E-4E43-9BF2-878C4C87CD98}"
+	ProjectSection(SolutionItems) = preProject
+		.editorconfig = .editorconfig
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

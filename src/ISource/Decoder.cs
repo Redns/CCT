@@ -1,36 +1,37 @@
-﻿namespace CCT.ISource
+﻿using System.Text;
+
+namespace CCT.ISource
 {
     public class Decoder
     {
         /// <summary>
         /// 使用指定码集对序列译码
         /// </summary>
-        /// <param name="encodeMsg">编码后的序列</param>
-        /// <param name="codeSet">码集</param>
+        /// <param name="encodeBitStream">待译码的比特序列</param>
+        /// <param name="symbols">符号集合</param>
         /// <returns></returns>
-        public static string Decode(string encodeMsg, Dictionary<string, string> codeSet)
+        public static byte[] Decode(string encodeBitStream, Dictionary<byte, string> symbols)
         {
-            var buffer = string.Empty;
-            var decodeMsg = string.Empty;
+            var buffer = new StringBuilder();
+            var decodeMsg = new List<byte>();
 
-            var codeSetReverse = new Dictionary<string, string>();
-            foreach(var character in codeSet.Keys)
+            var symbolsReverse = new Dictionary<string, byte>();
+            foreach(var character in symbols.Keys)
             {
-                codeSetReverse.Add(codeSet[character], character);
+                symbolsReverse.Add(symbols[character], character);
             }
 
-
-            for(int i = 0; i < encodeMsg.Length; i++)
+            for(int i = 0; i < encodeBitStream.Length; i++)
             {
-                buffer += encodeMsg[i];
-                if (codeSetReverse.ContainsKey(buffer))
+                buffer.Append(encodeBitStream[i]);
+                if (symbolsReverse.ContainsKey(buffer.ToString()))
                 {
-                    decodeMsg += codeSetReverse[buffer];
-                    buffer = string.Empty;
+                    decodeMsg.Add(symbolsReverse[buffer.ToString()]);
+                    buffer.Clear();
                 }
             }
 
-            return decodeMsg;
+            return decodeMsg.ToArray();
         }
     }
 }

@@ -1,4 +1,5 @@
 ﻿using CCT.Common;
+using System.Text;
 
 namespace CCT.ISource
 {
@@ -9,18 +10,18 @@ namespace CCT.ISource
         /// </summary>s
         public struct EncodeResult
         {
-            public Dictionary<string, string> Codons { get; set; }  // 码字
+            public Dictionary<byte, string> Codons { get; set; }    // 码字
             public double AverageLength { get; set; }               // 平均码长
             public double Efficient { get; set; }                   // 编码效率
 
             public EncodeResult()
             {
-                Codons = new Dictionary<string, string>();
+                Codons = new Dictionary<byte, string>();
                 AverageLength = 0;
                 Efficient = 0;
             }
 
-            public EncodeResult(Dictionary<string, string> codons, double averageLength, double efficient)
+            public EncodeResult(Dictionary<byte, string> codons, double averageLength, double efficient)
             {
                 Codons = codons;
                 AverageLength = averageLength;
@@ -32,16 +33,50 @@ namespace CCT.ISource
         /// <summary>
         /// 使用特定码集对信源进行转换
         /// </summary>
-        /// <param name="msg">信源字符序列</param>
-        /// <param name="codeSet">码集</param>
+        /// <param name="data">输入字节数组</param>
+        /// <param name="symbols">符号集合</param>
         /// <returns></returns>
-        public static string Encode(string msg, Dictionary<string, string> codeSet)
+        /// <exception cref="KeyNotFoundException"></exception>
+        public static string Encode(byte[] data, Dictionary<byte, string> symbols, int? len = null)
         {
-            foreach (var character in codeSet.Keys)
+            var bitStream = new StringBuilder();
+
+            try
             {
-                msg = msg.Replace(character, codeSet[character]);
+                if (len == null) { len = data.Length; }
+                for (int i = 0; i < len; i++)
+                {
+                    bitStream.Append(symbols[data[i]]);
+                }
             }
-            return msg;
+            catch (KeyNotFoundException)
+            {
+                throw new KeyNotFoundException("输入字节数组中存在未知符号!");
+            }
+
+            return bitStream.ToString();
+        }
+
+
+        /// <summary>
+        /// 使用特定码集对信源进行转换
+        /// </summary>
+        /// <param name="bitStream">输入字节流</param>
+        /// <param name="symbols">符号集合</param>
+        /// <param name="bufferSize">缓冲区大小（字节）</param>
+        /// <returns></returns>
+        public static string Encode(Stream bitStream, Dictionary<byte, string> symbols, int bufferSize = 2048)
+        {
+            var buffer = new byte[bufferSize];
+            var encodeBitStream = new StringBuilder();
+
+            int readinLen;
+            while ((readinLen = bitStream.Read(buffer, 0, bufferSize)) > 0)
+            {
+                encodeBitStream.Append(Encode(buffer, symbols, readinLen));
+            }
+
+            return encodeBitStream.ToString();
         }
 
 
@@ -124,14 +159,14 @@ namespace CCT.ISource
         /// </summary>
         /// <param name="countResult">信源统计结果</param>
         /// <returns></returns>
-        public static EncodeResult Hoffman(Counter.CountResult countResult)
+        public static EncodeResult Hoffman(Dictionary<byte, double> symbols)
         {
             var res = new EncodeResult();
-            var characters = countResult.Symbols.Keys.ToArray();
+            var characters = symbols.Keys.ToArray();
             var characterProbabilities = new double[characters.Length];
             for(int i = 0; i < characters.Length; i++)
             {
-                characterProbabilities[i] = countResult.Symbols[characters[i]];
+                characterProbabilities[i] = symbols[characters[i]];
             }
 
             string[] codons;
@@ -139,7 +174,7 @@ namespace CCT.ISource
 
             for(int i = 0; i < characters.Length; i++)
             {
-                res.Codons.Add($"{characters[i]}", codons[i]);
+                res.Codons.Add(characters[i], codons[i]);
             }
 
             return res;
@@ -194,14 +229,14 @@ namespace CCT.ISource
         /// </summary>
         /// <param name="countResult">信源统计结果</param>
         /// <returns></returns>
-        public static EncodeResult Shannon(Counter.CountResult countResult)
+        public static EncodeResult Shannon(Dictionary<byte, double> symbols)
         {
             var res = new EncodeResult();
-            var characters = countResult.Symbols.Keys.ToArray();
+            var characters = symbols.Keys.ToArray();
             var characterProbabilities = new double[characters.Length];
             for (int i = 0; i < characters.Length; i++)
             {
-                characterProbabilities[i] = countResult.Symbols[characters[i]];
+                characterProbabilities[i] = symbols[characters[i]];
             }
 
             string[] codons;
@@ -209,7 +244,7 @@ namespace CCT.ISource
 
             for (int i = 0; i < characters.Length; i++)
             {
-                res.Codons.Add($"{characters[i]}", codons[i]);
+                res.Codons.Add(characters[i], codons[i]);
             }
 
             return res;
@@ -304,14 +339,14 @@ namespace CCT.ISource
         /// </summary>
         /// <param name="countResult">信源统计结果</param>
         /// <returns></returns>
-        public static EncodeResult Feno(Counter.CountResult countResult)
+        public static EncodeResult Feno(Dictionary<byte, double> symbols)
         {
             var res = new EncodeResult();
-            var characters = countResult.Symbols.Keys.ToArray();
+            var characters = symbols.Keys.ToArray();
             var characterProbabilities = new double[characters.Length];
             for (int i = 0; i < characters.Length; i++)
             {
-                characterProbabilities[i] = countResult.Symbols[characters[i]];
+                characterProbabilities[i] = symbols[characters[i]];
             }
 
             string[] codons;
@@ -319,7 +354,7 @@ namespace CCT.ISource
 
             for (int i = 0; i < characters.Length; i++)
             {
-                res.Codons.Add($"{characters[i]}", codons[i]);
+                res.Codons.Add(characters[i], codons[i]);
             }
 
             return res;
