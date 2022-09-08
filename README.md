@@ -32,6 +32,7 @@
 | :----------------------------: | :----------------------------------------------------------: |
 | 信源编码（霍夫曼、费诺、香农） | [Go](https://github.com/Redns/CCT/tree/master/test/SourceEncoding) |
 |        信源编码 & 译码         | [Go](https://github.com/Redns/CCT/tree/master/test/SourceEncodingAndDecoding) |
+|         数字调制/解调          |  [Go](https://github.com/Redns/CCT/tree/master/test/Modem)   |
 
 ## Q & A
 

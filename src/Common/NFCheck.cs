@@ -7,10 +7,9 @@
         /// </summary>
         /// <param name="d"></param>
         /// <returns></returns>
-        public static bool IsInteger(double d)
+        public static bool IsInteger(double d) 
         {
-            if((int)d == d) { return true; }
-            return false;
+            return (int)d == d;
         }
     }
 }

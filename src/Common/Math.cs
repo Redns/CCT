@@ -13,7 +13,7 @@
             var entropy = 0.0;
             foreach(var probability in probabilities)
             {
-                if((probability < 0) || (probability > 1)) { throw new ArgumentException("符号概率不能小于0，也不能大于1!"); }
+                if(probability is < 0 or > 1) { throw new ArgumentException("符号概率不能小于0，也不能大于1!"); }
                 else
                 {
                     entropy -= probability * System.Math.Log2(probability);
